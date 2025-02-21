@@ -55,7 +55,7 @@ class AbstractChosen
 
   choice_label: (item) ->
     if @include_group_label_in_selected and item.group_label?
-      "<b class='group-name'>#{item.group_label}</b>#{item.html}"
+      "<b class='group-name'>#{this.escape_html(item.group_label)}</b>#{item.html}"
     else
       item.html
 
@@ -118,7 +118,7 @@ class AbstractChosen
 
     option_el = document.createElement("li")
     option_el.className = classes.join(" ")
-    option_el.style.cssText = option.style
+    option_el.style.cssText = option.style if option.style
     option_el.setAttribute("data-option-array-index", option.array_index)
     option_el.innerHTML = option.highlighted_html or option.html
     option_el.title = option.title if option.title
@@ -166,7 +166,7 @@ class AbstractChosen
     else
       this.results_show()
 
-  winnow_results: ->
+  winnow_results: (options) ->
     this.no_results_clear()
 
     results = 0
@@ -225,7 +225,7 @@ class AbstractChosen
       this.no_results query unless @create_option and @skip_no_results
     else
       this.update_results_content this.results_option_build()
-      this.winnow_results_set_highlight()
+      this.winnow_results_set_highlight() unless options?.skip_highlight
 
     if @create_option and (results < 1 or (!exact_result and @persistent_create_option)) and query.length
       this.show_create_option( query )
@@ -346,12 +346,12 @@ class AbstractChosen
   get_single_html: ->
     """
       <a class="chosen-single chosen-default">
-        <input class="chosen-search-input" type="text" autocomplete="off" />
         <span>#{@default_text}</span>
         <div><b></b></div>
       </a>
       <div class="chosen-drop">
         <div class="chosen-search">
+          <input class="chosen-search-input" type="text" autocomplete="off" />
         </div>
         <ul class="chosen-results"></ul>
       </div>
